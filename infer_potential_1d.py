@@ -191,7 +191,7 @@ plt.plot(alpha_gridsearch, beta_gridsearch, '.y', markersize=10)"""
 
 
 # optimization procedure
-def optfnc(par):
+def optfnc(par, xs):
 	return loglike__(xs, Potential(par))
 
 import scipy.optimize as opt
@@ -215,6 +215,11 @@ plt.title("Potential $\Phi$")
 plt.legend()
 plt.show()
 
+def MISE(pot):
+  fncvals = pot.Phi(xs_plot)
+  fncvals_true = Potential(true_coeffs).Phi(xs_plot)
+  return np.trapz((fncvals-fncvals_true)**2, x=xs_plot)
+
 # #%%
 
 # # Test des Vorwaertsmodelles
@@ -235,3 +240,25 @@ plt.show()
 # plt.xlabel("t")
 # plt.ylabel("x")
 # plt.title("Trajectories of all particles with optimal parameters")
+
+
+#%%
+
+num_particles_list = [2**n for n in range(3,7)]
+num_MC = 3
+
+MISE_array = np.zeros((len(num_particles_list), num_MC))
+
+for n_p, num_p in enumerate(num_particles_list):
+  print(f"num_particles = {num_p}")
+  for m_MC in range(num_MC):
+    print(f"MC iteration {m_MC}")
+    # Test des Vorwaertsmodelles
+    x0s = np.linspace(0, 0.6, num_p)
+    ts, xs = trajectory(x0s, pot)
+    res = opt.minimize(lambda par: optfnc(par, xs), np.zeros_like(true_coeffs), method="BFGS",  options={"disp": True})
+    MISE_array[n_p,m_MC] = MISE(Potential(res.x))
+
+
+plt.figure()
+plt.boxplot(MISE_array.T, positions = num_particles_list)
