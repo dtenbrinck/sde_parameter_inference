@@ -244,7 +244,7 @@ def MISE(pot):
 
 #%%
 
-num_particles_list = [2**n for n in range(3,7)]
+num_particles_list = np.array([2**n for n in range(3,7)])
 num_MC = 3
 
 MISE_array = np.zeros((len(num_particles_list), num_MC))
@@ -262,3 +262,12 @@ for n_p, num_p in enumerate(num_particles_list):
 
 plt.figure()
 plt.boxplot(MISE_array.T, positions = num_particles_list)
+
+plt.figure()
+for m_MC in range(num_MC):
+  plt.loglog(num_particles_list, MISE_array[:,m_MC], 'k.')
+  plt.loglog(num_particles_list, 0.001*num_particles_list**(-1/2))
+
+
+
+
